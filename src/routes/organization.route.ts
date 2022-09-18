@@ -17,7 +17,7 @@ router.post('/organization', async (req: Request, res: Response) => {
 
 router.get('/organizations/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
-  const organization = await Organization.findOne({ id }, { _id: 0, __v: 0 });
+  const organization = await Organization.findOne({ id });
   res.json(organization);
 });
 

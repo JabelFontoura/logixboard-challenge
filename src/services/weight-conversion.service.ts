@@ -1,5 +1,5 @@
 export class WeightConversionService {
-  private weightConversions = [
+  private static weightConversions = [
     {
       fromUnit: 'KILOGRAMS',
       toUnit: 'OUNCES',
@@ -38,11 +38,9 @@ export class WeightConversionService {
     },
   ];
 
-  calculate(fromUnit: string, toUnit: string, value: number): number {
+  static convert(fromUnit: string, toUnit: string, value: number): number {
     toUnit = toUnit.toUpperCase();
-    const conversion = this.weightConversions.find(
-      (x) => x.fromUnit === fromUnit && x.toUnit === toUnit
-    );
+    const conversion = this.weightConversions.find((x) => x.fromUnit === fromUnit && x.toUnit === toUnit);
 
     if (fromUnit === toUnit) return value;
 
@@ -54,5 +52,15 @@ export class WeightConversionService {
     }
 
     return 0;
+  }
+
+  static sumAndConvert(weights, unit): number {
+    let weightSum = 0;
+
+    for (let weight of weights) {
+      weightSum += this.convert(weight.unit, unit, parseFloat(weight.weight));
+    }
+
+    return weightSum;
   }
 }

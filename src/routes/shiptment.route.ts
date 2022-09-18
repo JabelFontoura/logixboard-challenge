@@ -14,17 +14,8 @@ router.post('/shipment', async (req: Request, res: Response) => {
     transportPacks,
   } = req.body;
 
-  let organizationRefs = [] as any;
-  await Promise.all(
-    organizations.map(async (orgCode) => {
-      const org = await Organization.findOne(
-        { code: orgCode },
-        { _id: 0, __v: 0 }
-      );
-      organizationRefs.push(org);
-    })
-  );
-
+  const organizationRefs = await Organization.find({ code: { $in: organizations} });
+    
   const shipment = await Shipment.findOneAndUpdate(
     { referenceId },
     {
@@ -42,10 +33,7 @@ router.post('/shipment', async (req: Request, res: Response) => {
 
 router.get('/shipments/:referenceId', async (req: Request, res: Response) => {
   const { referenceId } = req.params;
-  const shipment = await Shipment.findOne(
-    { referenceId },
-    { _id: 0, __v: 0, 'transportPacks._id': 0 }
-  );
+  const shipment = await Shipment.findOne({ referenceId }).populate('organizations');
 
   res.json(shipment);
 });
@@ -55,12 +43,7 @@ router.get('/shipments/weight/:unit', async (req: Request, res: Response) => {
   const { unit } = req.params;
   const shipments = await Shipment.find();
   const weights = [].concat.apply([], shipments.map(s => (s.transportPacks as any).nodes)).map(x => x.totalWeight);
-  const weightConversionService = new WeightConversionService();
-  let weightSum = 0;
-
-  for (let weight of weights) {
-    weightSum += weightConversionService.calculate(weight.unit, unit, parseFloat(weight.weight));
-  }
+  const weightSum = WeightConversionService.sumAndConvert(weights, unit);
 
   res.json({ totalWeight: weightSum.toFixed(2) })
 });

@@ -16,20 +16,30 @@ interface OrganizationDoc extends mongoose.Document {
   code: string;
 }
 
-const OrganizationSchema = new mongoose.Schema({
-  type: {
-    type: String,
-    required: true
+const OrganizationSchema = new mongoose.Schema(
+  {
+    type: {
+      type: String,
+      required: true,
+    },
+    id: {
+      type: String,
+      required: true,
+    },
+    code: {
+      type: String,
+      required: true,
+    },
   },
-  id: {
-    type: String,
-    required: true,
-  },
-  code: {
-    type: String,
-    required: true,
-  },
-});
+  {
+    toJSON: {
+      transform(doc, ret) {
+        delete ret._id;
+        delete ret.__v;
+      },
+    },
+  }
+);
 
 OrganizationSchema.statics.build = (attrs: OrganizationAttrs) => {
   return new Organization(attrs);
